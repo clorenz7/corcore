@@ -1,5 +1,5 @@
 from unittest import TestCase
-from binary_search_trees import Node, Tree
+from pycorcore.bst import Node, Tree
 
 
 class TestBst(TestCase):
@@ -31,3 +31,30 @@ class TestBst(TestCase):
 
         with self.assertRaises(KeyError):
             self.tree.query(sum(self.vals))  # assuming non-neg ints
+
+
+class TestDepth(TestCase):
+
+    def test_balanced_depth(self):
+        tree = Tree(Node(5, None))
+        # Test degenerate case: 1 node
+        depth, deepest_node = tree.get_deepest_node()
+        self.assertEqual(depth, 0)
+        self.assertEqual(deepest_node.key, 5)
+
+        # Add more keys on left side so it is the longest
+        self.vals = (4, 3, 2, 1, 0, 6, 7, 8)
+        for val in self.vals:
+            tree.add_node(Node(val, None))
+
+        depth, deepest_node = tree.get_deepest_node()
+        self.assertEqual(depth, 5)
+        self.assertEqual(deepest_node.key, 0)
+
+        # Add additional keys to the right so it is longest
+        for val in (9, 10, 11):
+            tree.add_node(Node(val, None))
+
+        depth, deepest_node = tree.get_deepest_node()
+        self.assertEqual(depth, 6)
+        self.assertEqual(deepest_node.key, 11)

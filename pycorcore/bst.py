@@ -23,6 +23,37 @@ class Tree(object):
         elif new_key_is_more:
             self.add_node(new_node, base_node.right)
 
+    def get_deepest_node(self, start_node=None):
+        """
+        Do a recursive search to get the deepest node in the tree,
+        and return its depth.
+        :returns: depth, deepest_node
+        """
+
+        start_node = start_node or self.root_node
+
+        left_node = start_node.left
+        right_node = start_node.right
+
+        if left_node is None and right_node is None:
+            return 0, start_node
+        elif left_node is None:
+            depth, node = self.get_deepest_node(right_node)
+        elif right_node is None:
+            depth, node = self.get_deepest_node(left_node)
+        else:
+            right_depth, r_last_node = self.get_deepest_node(right_node)
+            left_depth, l_last_node = self.get_deepest_node(left_node)
+
+            if right_depth > left_depth:
+                depth = right_depth
+                node = r_last_node
+            else:
+                depth = left_depth
+                node = l_last_node
+
+        return depth+1, node
+
 
 class Node(object):
 
