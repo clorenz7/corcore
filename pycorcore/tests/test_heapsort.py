@@ -1,5 +1,5 @@
 from unittest import TestCase
-from heapsort import heapsort
+from pycorcore.heapsort import heapsort
 
 
 class TestHeap(TestCase):
