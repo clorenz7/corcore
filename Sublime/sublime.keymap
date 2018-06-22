@@ -1,0 +1,4 @@
+[
+    { "keys": ["super+i"], "command": "insert_snippet", "args": {"contents": "import ipdb; ipdb.set_trace()"}},
+    { "keys": ["super+p"], "command": "insert_snippet", "args": {"contents": "import matplotlib.pyplot as plt;"}}
+]
