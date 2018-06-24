@@ -5,9 +5,20 @@ Exercise 7.7 from Sutton and Barto "Reinforcement Learning"
 The goal is to empirically demonstrate the advantage of using replacing traces on
 a problem where you always want to move "right" rather than stay in the same place. 
 
-The issue is that accumulating traces can bias you towards staying in the same place. 
+The issue is that accumulating traces can bias you towards staying in the same place.
+Two different strategies are attempted: 
+    "replace-trace" where the value is set to 1 
+    "clear-revist" where other values are also set to 0
 
 This code implements Sarsa(lambda) with lambda=0.9. 
+
+
+Conclusions:
+    - replace-trace helps immensely on this problem
+    - clear-revist has negligible impact
+    - Discount (gamma) is important for numerical stability
+    - RMS of 1 for 10 states is expected under e-greedy with epsilon=0.1
+    - High values of alpha increase variance, and thus RMS error
 """
 
 import random
@@ -207,23 +218,26 @@ def main():
 
     # Setup parameters
     n_alpha = 25
+    n_replace = 3
     alphas = np.linspace(0.05, 0.95, n_alpha).tolist()
-    n_exp = 100  # number of times to run each experiment
-    results = np.zeros((n_alpha, 2, n_exp))
+    n_exp = 50  # number of times to run each experiment
+    results = np.zeros((n_alpha, n_replace, n_exp))
     n_states = 10 
+    n_episodes = 20  # number of episodes in each experiment
 
     for alp_idx, alpha in enumerate(alphas):
-        for replace in (0, 1):
+        for replace in range(n_replace):
             for exp_idx in range(n_exp):
                 agent = Agent(
                     n_states=n_states, 
                     learn_rate=alpha, 
                     replace_trace=bool(replace),
-                    discount=0.99,  # important for numerical stability! 
+                    discount=0.99,  # important for numerical stability!,
+                    clear_revist=replace == 2,
                 )
                 world = RightWrong(n_states, agent)
 
-                step_history = world.run_experiment(n_episodes=20)
+                step_history = world.run_experiment(n_episodes=n_episodes)
 
                 rms_err = np.mean(np.sqrt((step_history - n_states)**2))
                 results[alp_idx, replace, exp_idx] = rms_err
@@ -231,11 +245,16 @@ def main():
     # Get the mean results for each experiment
     avg_results = np.mean(results, axis=2)
     # plot the results
-    lines = plt.plot(alphas, avg_results[:, 0], '-rx', alphas, avg_results[:, 1], '-bx')
+    lines = plt.plot(
+        alphas, avg_results[:, 0], '-rx', 
+        alphas, avg_results[:, 1], '-bx',
+        alphas, avg_results[:, 2], '-gx',
+    )
     plt.xlabel('Learn Rate (alpha)')
     plt.ylabel('RMS Error over # of steps')
     lines[0].set_label('Accumulated')
-    lines[1].set_label('Replace')
+    lines[1].set_label('Replace Trace')
+    lines[2].set_label('Clear Trace')
     plt.legend()
     plt.show()
 
