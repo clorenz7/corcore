@@ -2,6 +2,8 @@
 First, will create a quick object to hold adjacency list rep of graph
 
 """
+from collections import deque
+
 
 class Graph(object):
 
@@ -42,6 +44,10 @@ class Graph(object):
 
 
 class DFS(object):
+    """
+    Object to perform a depth first search.
+    Stores results of enter and exit step for each vertex.
+    """
 
     def __init__(self, graph):
         self.graph = graph
@@ -49,7 +55,6 @@ class DFS(object):
         self.entered = [-1]*graph.n_vertices
         self.exited = [-1]*graph.n_vertices
         self.step = 1
-        self.vertex_stack = []
 
     def visit(self, index):
 
@@ -79,3 +84,38 @@ class DFS(object):
 
         for v_idx in visit_order:
             self.visit(v_idx)
+
+
+class BFS(object):
+    """
+    Object to perform a breadth first search.
+    Stores results of depth and parent for each vertex.
+    """
+
+    def __init__(self, graph):
+        self.graph = graph
+        n_vert = graph.n_vertices
+        self.state = ['unseen']*n_vert
+        self.level = [-1]*n_vert
+        self.parent = [-1]*n_vert
+        self.vertex_queue = deque([])
+
+    def search(self, source_index):
+
+        self.vertex_queue.append(source_index)
+        self.level[source_index] = 0
+
+        while len(self.vertex_queue) != 0:
+            index = self.vertex_queue.popleft()
+
+            adj_indexes = self.graph.get_edges(index)
+            for adj_index in adj_indexes:
+                if self.state[adj_index] == "unseen":
+                    self.state[adj_index] = 'visited'
+                    self.parent[adj_index] = index
+                    self.vertex_queue.append(adj_index)
+                    self.level[adj_index] = self.level[index] + 1
+
+            self.state[index] = 'exited'
+
+

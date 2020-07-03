@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from pycorcore.graph import Graph, DFS
+from pycorcore.graph import Graph, DFS, BFS
 
 class TestDFS(TestCase):
 
@@ -65,3 +65,45 @@ class TestDFS(TestCase):
 
         self.assertEqual(dfs.entered, [1,2,9,4,3,10])
         self.assertEqual(dfs.exited,  [8,7,12,5,6,11])
+
+
+
+class TestBFS(TestCase):
+
+    def test_full_tree(self):
+        vertices = range(7)
+        edge_list = [
+            (0,1), (0,2),
+            (1,3), (1,4),
+            (2,5), (2,6),
+        ]
+        graph = Graph(vertices, edge_list)
+        bfs = BFS(graph)
+        bfs.search(0)
+
+        self.assertEqual(bfs.level,   [0,1,1,2,2,2,2])
+        self.assertEqual(bfs.parent, [-1,0,0,1,1,2,2])
+
+    def test_bfs_clr(self):
+        """
+        Example from Intro To Algorithms Figure 23.3
+        """
+        vertices = range(8)
+        edge_list = [
+            (0,1), (0,4),
+            (1,5),
+            (2,3), (2,5), (2,6),
+            (3,7),
+            (5,6),
+            (6,7)
+        ]
+        graph = Graph(vertices, edge_list, undirected=True)
+        bfs = BFS(graph)
+        bfs.search(1)
+
+        self.assertEqual(len(bfs.vertex_queue), 0)
+        self.assertEqual(bfs.level,  [1,  0, 2, 3, 2, 1, 2, 3])
+        self.assertEqual(bfs.parent, [1, -1, 5, 2, 0, 1, 5, 6])
+
+
+
