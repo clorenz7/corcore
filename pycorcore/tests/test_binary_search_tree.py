@@ -1,11 +1,11 @@
 from unittest import TestCase
-from pycorcore.bst import Node, Tree
+from pycorcore.bst import Node, BinarySearchTree
 
 
 class TestBst(TestCase):
 
     def setUp(self):
-        tree = Tree(Node(15, None))
+        tree = BinarySearchTree(Node(15, None))
         self.vals = (6, 18, 3, 7, 17, 20, 2, 4, 13, 9)
         for val in self.vals:
             tree.add_node(Node(val, None))
@@ -36,7 +36,7 @@ class TestBst(TestCase):
 class TestDepth(TestCase):
 
     def test_balanced_depth(self):
-        tree = Tree(Node(5, None))
+        tree = BinarySearchTree(Node(5, None))
         # Test degenerate case: 1 node
         depth, deepest_node = tree.get_deepest_node()
         self.assertEqual(depth, 0)
