@@ -32,6 +32,28 @@ class TestBst(TestCase):
         with self.assertRaises(KeyError):
             self.tree.query(sum(self.vals))  # assuming non-neg ints
 
+class TestRotate(TestCase):
+    def test_rotate_right(self):
+        tree = BinarySearchTree(Node(12))
+        tree.add_node(Node(13))
+        tree.add_node(Node(10))
+        tree.add_node(Node(11))
+        other_node = Node(9)
+        tree.add_node(other_node)
+        tree.add_node(Node(8))
+        tree.add_node(Node(7))
+
+        tree.rotate_right(tree.root_node)
+        tree.rotate_right(other_node)
+
+        self.assertEqual(tree.root_node.key, 10)
+        self.assertEqual(tree.root_node.right.key, 12)
+        self.assertEqual(tree.root_node.right.left.key, 11)
+        self.assertEqual(tree.root_node.right.right.key, 13)
+
+        self.assertEqual(tree.root_node.left.key, 8)
+        self.assertEqual(tree.root_node.left.right.key, 9)
+        self.assertEqual(tree.root_node.left.left.key, 7)
 
 class TestDepth(TestCase):
 
