@@ -1,10 +1,21 @@
 
-class Tree(object):
+class BinarySearchTree(object):
     def __init__(self, root_node):
         self.root_node = root_node
 
-    def query(self, key):
-        return self.root_node.query(key)
+    def query(self, key, node=None):
+        node = node or self.root_node
+
+        if node.key == key:
+            return node
+        elif node.key > key:
+            if node.left is None:
+                raise KeyError("{} key was not found!".format(key))
+            return self.query(key, node.left)
+        else:
+            if node.right is None:
+                raise KeyError("{} key was not found!".format(key))
+            return self.query(key, node.right)
 
     def add_node(self, new_node, base_node=None):
 
@@ -75,6 +86,11 @@ class Node(object):
 
         return repr_str
 
+    @property
+    def key(self):
+        return self._key
+
+
     def max_child(self):
         if self.right is not None:
             return self.right.max_child()
@@ -106,14 +122,3 @@ class Node(object):
     def successor(self):
         raise NotImplementedError("Node Class Successor Method!")
 
-    def query(self, key):
-        if self.key == key:
-            return self
-        elif self.key > key:
-            if self.left is None:
-                raise KeyError("{} key was not found!")
-            return self.left.query(key)
-        else:
-            if self.right is None:
-                raise KeyError("{} key was not found!")
-            return self.right.query(key)
