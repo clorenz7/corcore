@@ -55,6 +55,24 @@ class TestRotate(TestCase):
         self.assertEqual(tree.root_node.left.right.key, 9)
         self.assertEqual(tree.root_node.left.left.key, 7)
 
+    def test_rotate_left(self):
+        tree = BinarySearchTree(Node(0))
+        rotate_node = Node(1)
+        tree.add_node(rotate_node)
+        tree.add_node(Node(3))
+        tree.add_node(Node(2))
+        tree.add_node(Node(4))
+
+        tree.rotate_left(tree.root_node)
+        tree.rotate_left(rotate_node)
+
+        self.assertEqual(tree.root_node.key, 3)
+        self.assertEqual(tree.root_node.left.key, 1)
+        self.assertEqual(tree.root_node.right.key, 4)
+        self.assertEqual(tree.root_node.left.right.key, 2)
+        self.assertEqual(tree.root_node.left.left.key, 0)
+
+
 class TestDepth(TestCase):
 
     def test_balanced_depth(self):

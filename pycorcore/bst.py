@@ -95,6 +95,38 @@ class BinarySearchTree(object):
         else:
             grand_parent.left = new_parent
 
+    def rotate_left(self, node):
+
+        # Get the right child
+        new_parent = node.right
+        if new_parent is None:
+            raise ValueError("Can't rotate: right child is None!")
+
+        # Get the grand parent
+        grand_parent = node.parent
+
+        # Get the left child of the new parent
+        new_right_child = new_parent.left
+
+        # Swap the node and its child
+        node.parent = new_parent
+        new_parent.left = node
+
+        # Update the grand_parent's child
+        new_parent.parent = grand_parent
+        # Handle the case where the parent doesn't exist
+        if grand_parent is None:
+            self.root_node = new_parent
+        else:
+            if grand_parent.left is node:
+                grand_parent.left = new_parent
+            else:
+                grand_parent.right = new_parent
+        # Swap the left child of the new parent to be the right child of node
+        node.right = new_right_child
+        if new_right_child is not None:
+            new_right_child.parent = node
+
 
 class Node(object):
 
