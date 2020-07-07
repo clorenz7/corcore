@@ -32,6 +32,29 @@ class TestBst(TestCase):
         with self.assertRaises(KeyError):
             self.tree.query(sum(self.vals))  # assuming non-neg ints
 
+    def test_delete_root(self):
+        self.tree.delete(self.tree.root_node)
+        self.assertIsNone(self.tree.root_node.parent)
+        self.assertEqual(self.tree.root_node.key, 17)
+        self.assertEqual(self.tree.root_node.left.key, 6)
+        self.assertEqual(self.tree.root_node.right.key, 18)
+        self.assertIsNone(self.tree.root_node.right.left)
+
+    def test_delete_leaf(self):
+        self.tree.delete(self.tree.root_node.right.right)
+        self.assertIsNone(self.tree.root_node.right.right)
+
+    def test_delete_1child(self):
+        self.tree.delete(self.tree.root_node.left.right)
+        self.assertEqual(self.tree.root_node.left.right.key, 13)
+        self.assertEqual(self.tree.root_node.left.right.parent.key, 6)
+
+    def test_delete_2children(self):
+        self.tree.delete(self.tree.root_node.right)
+        self.assertEqual(self.tree.root_node.right.key, 20)
+        self.assertEqual(self.tree.root_node.right.left.key, 17)
+        self.assertEqual(self.tree.root_node.right.parent.key, 15)
+
 class TestRotate(TestCase):
     def test_rotate_right(self):
         tree = BinarySearchTree(Node(12))

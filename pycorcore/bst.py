@@ -20,6 +20,10 @@ class BinarySearchTree(object):
     def add_node(self, new_node, base_node=None):
 
         base_node = base_node or self.root_node
+        if base_node is None:
+            self.root_node = base_node
+            return
+
         new_key_is_less = new_node.key <= base_node.key
         new_key_is_more = new_node.key >= base_node.key
 
@@ -127,6 +131,81 @@ class BinarySearchTree(object):
         if new_right_child is not None:
             new_right_child.parent = node
 
+    def successor(self, node):
+        """
+        Finds and returns the node in the tree with the next highest value.
+        If the node is the max value, returns None
+        """
+
+        if node.right is None:
+            # Need to search for the ancestor who's left child is also an ancestor
+            while node is not self.root_node:
+                parent = node.parent
+                if parent.left is node:
+                    return parent
+                else:
+                    node = parent
+
+            return None  # No successor
+        else:
+            # If there is a right subtree, find the min value of it.
+            node = node.right
+
+            while node.left is not None:
+                node = node.left
+
+            return node
+
+    def delete(self, node):
+        """
+        Deletes a key from the binary search tree, and repairs it to maintain BST properties.
+        """
+
+        left_is_none = node.left is None
+        right_is_none = node.right is None
+        parent = node.parent
+
+        # If node has no children, just null parent's pointer
+        if left_is_none and right_is_none:
+            if parent is None:
+                self.root_node = None
+            else:
+                if parent.right is node:
+                    parent.right = None
+                else:
+                    parent.left = None
+            return
+
+        # If there are children, find the node to splice in
+        # If node has 2 children, find the successor
+        if not left_is_none and not right_is_none:
+            splice_node = self.successor(node)
+            splice_node.left = node.left
+
+            if splice_node.parent.left is splice_node:
+                splice_node.parent.left = splice_node.right
+                splice_node.right = node.right
+
+        else:
+            # If node has 1 child, splice in that child
+            if left_is_none:
+                splice_node = node.right
+            else:
+                splice_node = node.left
+
+        # Fix the parent pointers
+        splice_node.parent = parent
+        if parent is not None:
+            if parent.left is node:
+                parent.left = splice_node
+            else:
+                parent.right = splice_node
+
+        # If node was root, update root
+        if node is self.root_node:
+            self.root_node = splice_node
+
+
 
 class Node(object):
 
@@ -180,7 +259,4 @@ class Node(object):
                 return None
             else:
                 return search_node.key
-
-    def successor(self):
-        raise NotImplementedError("Node Class Successor Method!")
 
