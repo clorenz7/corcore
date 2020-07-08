@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from pycorcore.graph import Graph, DFS, BFS
+from pycorcore.graph import Graph, DFS, BFS, strongly_connected_components
 
 class TestDFS(TestCase):
 
@@ -106,4 +106,41 @@ class TestBFS(TestCase):
         self.assertEqual(bfs.parent, [1, -1, 5, 2, 0, 1, 5, 6])
 
 
+class TestConComps(TestCase):
 
+    def test_transpose(self):
+        vertices = range(5)
+        edge_list = [
+            (0,1),
+            (1,2),
+            (2,3),
+            (3,0),
+            (4,3)
+        ]
+        graph = Graph(vertices, edge_list)
+
+        trans_graph = graph.transpose()
+
+        self.assertEqual(trans_graph.get_edges(0), [3])
+        self.assertEqual(trans_graph.get_edges(1), [0])
+        self.assertEqual(trans_graph.get_edges(2), [1])
+        self.assertEqual(trans_graph.get_edges(3), [2,4])
+
+    def test_strong_conn_comps(self):
+        vertices = range(10)
+        edge_list = [
+            (0,1),
+            (1,2),
+            (2,3),
+            (3,0), (3,4),
+            (4,5),
+            (5,6),
+            (6,4), (6,7),
+            (7,8),
+            (8,7), (8,9)
+        ]
+        graph = Graph(vertices, edge_list)
+
+        comps = strongly_connected_components(graph)
+
+        self.assertEqual(comps, [[0, 1, 2, 3], [4, 5, 6], [7, 8], [9]])

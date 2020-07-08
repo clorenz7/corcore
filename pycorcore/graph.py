@@ -43,6 +43,23 @@ class Graph(object):
         return self.vertices[idx]
 
 
+    def transpose(self):
+        if self._undirected:
+            raise ValueError("Transpose of undirected graph doesn't make sense!")
+
+        t_edge_list = []
+        for v_from, v_to_list in enumerate(self.adj_list):
+            if len(v_to_list) > 0:
+                t_edge_list.extend([ (v, v_from) for v in v_to_list ])
+
+        t_graph = Graph(self.vertices, t_edge_list)
+
+        return t_graph
+
+
+    def T(self):
+        return self.transpose()
+
 class DFS(object):
     """
     Object to perform a depth first search.
@@ -85,6 +102,8 @@ class DFS(object):
         for v_idx in visit_order:
             self.visit(v_idx)
 
+        return self
+
 
 class BFS(object):
     """
@@ -117,5 +136,44 @@ class BFS(object):
                     self.level[adj_index] = self.level[index] + 1
 
             self.state[index] = 'exited'
+
+        return self
+
+def strongly_connected_components(graph):
+
+    # Do a depth first search of the graph
+    dfs_1 = DFS(graph).search()
+
+    # Sort vertices by exit time
+    visit_order = sorted(zip(graph.vertices, dfs_1.exited), key=lambda x:x[1], reverse=True)
+    visit_order = [v[0] for v in visit_order]
+
+    # Do a depth first search of the transposed graph
+    trans_graph = graph.transpose()
+    dfs_2 = DFS(trans_graph).search(visit_order)
+
+    # Re-construct the DFS trees to get connected components
+    # Initialize variables
+    conn_comps = []
+    root_vert = visit_order[0]
+    exit_time = 0
+
+    # O(n^2) worst case implementation, could probably do better by storing more data in DFS object
+    enter_times = list(dfs_2.entered)
+    while exit_time < graph.n_vertices*2:
+        comps = []
+        exit_time = dfs_2.exited[root_vert]
+        for (ii, enter_time) in enumerate(enter_times):
+            # All entrance times less than exit time are in the tree
+            if enter_time < exit_time:
+                comps.append(ii)
+                enter_times[ii] = graph.n_vertices*100  # never select again
+            # New root vertex discovered at next time step
+            if enter_time == exit_time+1:
+                root_vert = ii
+        conn_comps.append(comps)
+        exit_time += 1
+
+    return conn_comps
 
 
