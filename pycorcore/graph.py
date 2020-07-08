@@ -16,17 +16,26 @@ class Graph(object):
                 default: False
         """
 
-        self._vertices = vertices
+        self.vertices = vertices
         self._nv = len(vertices)
         self._ne = len(edge_list)
+        self.weight_map = {}
+        self._undirected = undirected
 
         self.adj_list = [ [] for _ in range(self.n_vertices) ]
 
         for edge in edge_list:
             u,v = edge[:2]  # Will add weight later
+            if len(edge) > 2:
+                w = edge[2]
+                self.weight_map[(u,v)] = w
+            else:
+                w = None
             self.adj_list[u].append(v)
             if undirected:
                 self.adj_list[v].append(u)
+                if w is not None:
+                    self.weight_map[(v,u)] = w
 
     @property
     def n_vertices(self):
@@ -42,6 +51,8 @@ class Graph(object):
     def get_vertex(self, idx):
         return self.vertices[idx]
 
+    def get_weight(self, v_from, v_to):
+        return self.weight_map[(v_from, v_to)]
 
     def transpose(self):
         if self._undirected:
