@@ -2,7 +2,9 @@ from unittest import TestCase
 
 import numpy as np
 
-from pycorcore.graph import Graph, DFS, BFS, strongly_connected_components
+from pycorcore.graph import Graph, DFS, BFS
+from pycorcore.graph import strongly_connected_components
+from pycorcore.graph import calc_min_spanning_tree
 
 class TestDFS(TestCase):
 
@@ -144,3 +146,18 @@ class TestConComps(TestCase):
         comps = strongly_connected_components(graph)
 
         self.assertEqual(comps, [[0, 1, 2, 3], [4, 5, 6], [7, 8], [9]])
+
+class TestSpanTree(TestCase):
+    def test_min_span_tree(self):
+        vertices = range(5)
+        edge_list = [
+            (0,1,1), (0,4, 100), (0, 2, 102), (0,3, 103),
+            (1,2,2), (1,4, 105),
+            (2,3,3), (2,4, 106),
+            (3,4,4), (3,1, 104),
+        ]
+        graph = Graph(vertices, edge_list)
+        edge_list = calc_min_spanning_tree(graph)
+
+        self.assertEqual(set(edge_list), {(0,1), (1,2), (2,3), (3,4)})
+

@@ -3,6 +3,8 @@ First, will create a quick object to hold adjacency list rep of graph
 
 """
 from collections import deque
+from queue import PriorityQueue  # Will implement my own later
+import math
 
 
 class Graph(object):
@@ -186,5 +188,40 @@ def strongly_connected_components(graph):
         exit_time += 1
 
     return conn_comps
+
+
+def calc_min_spanning_tree(graph):
+    """
+    Implementation of Kruskal's algorithm for finding a minimum spanning tree
+    """
+
+    vertex_set = set([])
+    edge_set = []
+
+    # Make each child its own root
+    root = range(graph.n_vertices)
+
+    # Sort the edges by weight
+    sorted_edges = sorted(
+        [ (graph.weight_map[key], key) for key in graph.weight_map ],
+        key=lambda x: x[0]
+    )
+
+    for weight, edge in sorted_edges:
+        u,v = edge
+        # If the two edges have different roots, they are different trees
+        if root[u] != root[v]:
+            # The edge goes from u to v, so the root of u is the new root of v
+            root[v] = root[u]
+
+            vertex_set.union(edge)
+            edge_set.append(edge)
+
+    return edge_set
+
+
+
+
+
 
 
