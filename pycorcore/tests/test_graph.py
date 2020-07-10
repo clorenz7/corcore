@@ -5,6 +5,7 @@ import numpy as np
 from pycorcore.graph import Graph, DFS, BFS
 from pycorcore.graph import strongly_connected_components
 from pycorcore.graph import calc_min_spanning_tree
+from pycorcore.graph import shortest_paths, NegativeCycleError
 
 class TestDFS(TestCase):
 
@@ -160,4 +161,38 @@ class TestSpanTree(TestCase):
         edge_list = calc_min_spanning_tree(graph)
 
         self.assertEqual(set(edge_list), {(0,1), (1,2), (2,3), (3,4)})
+
+
+class TestShortestPaths(TestCase):
+    def test_neg_cycle(self):
+        vertices = range(4)
+        edge_list = [
+            (0,1,1), (0,3,1),
+            (1,2,2),
+            (2,0,-10),
+            (3,1,3)
+        ]
+
+        graph = Graph(vertices, edge_list)
+
+        with self.assertRaises(NegativeCycleError):
+            min_path, parents = shortest_paths(graph, 0)
+
+    def test_shortest_path(self):
+        vertices = range(6)
+        edge_list = [
+            (0,1,1), (0,3,10),
+            (1,2,2), (1,3,20),
+            (2,3,3), (2,0,30),
+            (3,4,4), (3,5,40),
+            (4,5,5), (4,2,50),
+            (5,1,-1),
+        ]
+
+        graph = Graph(vertices, edge_list)
+
+        min_path, parents = shortest_paths(graph, 0)
+        self.assertEqual(min_path, [0, 1, 3, 6, 10, 15])
+        self.assertEqual(parents, [-6, 0, 1, 2, 3, 4])
+
 

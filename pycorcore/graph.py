@@ -2,10 +2,9 @@
 First, will create a quick object to hold adjacency list rep of graph
 
 """
+import warnings
 from collections import deque
-from queue import PriorityQueue  # Will implement my own later
 import math
-
 
 class Graph(object):
 
@@ -23,6 +22,7 @@ class Graph(object):
         self._ne = len(edge_list)
         self.weight_map = {}
         self._undirected = undirected
+        self._has_neg_weights = False
 
         self.adj_list = [ [] for _ in range(self.n_vertices) ]
 
@@ -31,6 +31,8 @@ class Graph(object):
             if len(edge) > 2:
                 w = edge[2]
                 self.weight_map[(u,v)] = w
+                if w < 0:
+                    self._has_neg_weights = True
             else:
                 w = None
             self.adj_list[u].append(v)
@@ -42,6 +44,10 @@ class Graph(object):
     @property
     def n_vertices(self):
         return self._nv
+
+    @property
+    def has_negative_weights(self):
+        return self._has_neg_weights
 
     def get_edges(self, v_idx):
         """
@@ -220,8 +226,69 @@ def calc_min_spanning_tree(graph):
     return edge_set
 
 
+class NegativeCycleError(ValueError):
+    pass
 
 
+def relax(from_idx, to_idx, weight, shortest_paths, parents):
+    """
+    Performs path relaxation for an edge between two vertices
+
+    The lists shortest_paths and parents are modified in-place.
+    """
+    new_path_length = shortest_paths[from_idx] + weight
+    if new_path_length < shortest_paths[to_idx]:
+        parents[to_idx] = from_idx
+        shortest_paths[to_idx] = new_path_length
 
 
+def shortest_paths(graph, source_idx):
+    """
+    input:
+        graph: [Graph] object holding graph definition
+        source_idx: [int] index of source vertex to find paths from
+    output:
+        shortest_paths: lengths of shortest path
+        parents: index of parent vertex along shortest path
+
+    raises: NegativeCycleError if a negative cycle is detected
+    """
+    use_dijkstra = not graph.has_negative_weights
+
+    if use_dijkstra:
+        warnings.warn("Dijkstra's algorithm not yet implemented! Using less efficient alg!")
+        use_dijkstra = False
+
+    if use_dijkstra:
+        pass # Placeholder for when implemented
+    else:
+        # Initialize the placeholder arrays
+        shortest_paths = [math.inf]*graph.n_vertices
+        shortest_paths[source_idx] = 0
+        parents = [graph.n_vertices]*graph.n_vertices
+        parents[source_idx] = -graph.n_vertices
+
+        # Use Bellman-Ford Algorithm
+        n_passes = graph.n_vertices - 1
+
+        # Run relax on each edge n_passes times...
+        for _ in range(n_passes):
+            # Loop over all edges
+            for from_idx in range(graph.n_vertices):
+                for to_idx in graph.get_edges(from_idx):
+                    weight = graph.get_weight(from_idx, to_idx)
+
+                    relax(from_idx, to_idx, weight, shortest_paths, parents)
+
+        # Check for the existence of negative cycles by looping over each edge
+        #  and seeing if you can reduce the path length
+        for from_idx in range(graph.n_vertices):
+            from_dist = shortest_paths[from_idx]
+            for to_idx in graph.get_edges(from_idx):
+                weight = graph.get_weight(from_idx, to_idx)
+                if shortest_paths[to_idx] > from_dist + weight:
+                    err_msg = f"Negative cycle detected on edge from {from_idx} to {to_idx}"
+                    raise NegativeCycleError(err_msg)
+
+    return shortest_paths, parents
 
