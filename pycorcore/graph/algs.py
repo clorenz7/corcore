@@ -1,8 +1,9 @@
 import warnings
 import math
 
-from .objects import DFS, BFS
-
+from .objects import DFS
+from .objects import BFS, VertexUnreachableError
+from .objects import FlowGraph
 
 class NegativeCycleError(ValueError):
     pass
@@ -137,3 +138,65 @@ def shortest_paths(graph, source_idx):
                     raise NegativeCycleError(err_msg)
 
     return shortest_paths, parents
+
+
+def calc_max_flow(graph, source_idx, sink_idx):
+    """
+    Uses the Edmonds-Karp algorithm to find the max flow through a graph
+    """
+
+    res_graph = graph
+    found_new_path = True
+
+    while found_new_path:
+        # Use BFS to find an augmenting path from source to sink.
+        try:
+            bfs = BFS(res_graph).search(source_idx, sink_idx)
+        except VertexUnreachableError:
+            found_new_path = False
+            break
+
+        # Calculate the flow along the path
+        max_flow, path = _calc_flow(res_graph, bfs, source_idx, sink_idx)
+
+        # Update the flow graph
+        _add_flow_to_path(graph, path, max_flow)
+
+        # Calculate the new residual network
+        res_graph = graph.calc_residual_network()
+
+    return graph.max_flow
+
+
+def _calc_flow(flow_graph, bfs_result, source_idx, sink_idx):
+
+    # Calculate the maximum possible flow
+    parent = sink_idx
+    current_idx = sink_idx
+    path = [sink_idx]  # will reverse at end
+    max_flow = math.inf
+
+    while current_idx != source_idx:
+        parent = bfs_result.parent[current_idx]
+        path.append(parent)
+        capacity = flow_graph.get_weight(parent, current_idx)
+        max_flow = min(max_flow, capacity)
+        current_idx = parent
+
+    path.reverse()
+
+    return max_flow, path
+
+def _add_flow_to_path(graph, path, flow):
+
+    for idx in range(len(path)-1):
+        v_from = path[idx]
+        v_to = path[idx+1]
+        graph.add_flow(v_from, v_to, flow)
+
+
+
+
+
+
+

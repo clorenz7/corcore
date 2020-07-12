@@ -6,6 +6,8 @@ from pycorcore.graph import Graph, DFS, BFS
 from pycorcore.graph import strongly_connected_components
 from pycorcore.graph import calc_min_spanning_tree
 from pycorcore.graph import shortest_paths, NegativeCycleError
+from pycorcore.graph import algs
+from pycorcore.graph.objects import FlowGraph
 
 class TestDFS(TestCase):
 
@@ -162,6 +164,8 @@ class TestSpanTree(TestCase):
 
         self.assertEqual(set(edge_list), {(0,1), (1,2), (2,3), (3,4)})
 
+        self.assertTrue(graph.is_valid)
+
 
 class TestShortestPaths(TestCase):
     def test_neg_cycle(self):
@@ -195,4 +199,21 @@ class TestShortestPaths(TestCase):
         self.assertEqual(min_path, [0, 1, 3, 6, 10, 15])
         self.assertEqual(parents, [-6, 0, 1, 2, 3, 4])
 
+class TestMaxFlow(TestCase):
 
+    def test_single_source_sink(self):
+        # Figure 27.4 from CLR
+        vertices = range(6)
+        edge_list = [
+            (0,1,16), (0,2,13),
+            (1,2,10), (1,3,12),
+            (2,1,4),  (2,4,14),
+            (3,2,9),  (3,5,20),
+            (4,3,7),  (4,5,4),
+        ]
+
+        graph = FlowGraph(vertices, edge_list, source_idx=0, sink_idx=5)
+
+        max_flow = algs.calc_max_flow(graph, source_idx=0, sink_idx=5)
+
+        self.assertEqual(max_flow, 23)
