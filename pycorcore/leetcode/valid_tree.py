@@ -18,8 +18,6 @@ check if these edges form a valid tree.
 #    - Add the "to" vertex to a set
 # (4) We need to have n-1 in our "to" set at the end, since one of them is the root.
 
-# Solved in 15 minutes.
-
 def is_valid_tree(n_nodes, edge_list):
 
     found_nodes = set([])
@@ -40,6 +38,7 @@ def is_valid_tree(n_nodes, edge_list):
 
 
 def test_valid():
+    print("Unit Testing Tree Validator...")
 
     n_nodes = 7
     edge_list = [(4,2), (4,6), (2,1), (2,3), (6, 5), (6, 7)]
@@ -65,6 +64,8 @@ def test_valid():
     edge_list = [(4,2), (4,6), (2,1), (2,3), (6, 5), (6, 7), (7, 6)]
     is_valid = is_valid_tree(n_nodes, edge_list)
     assert not(is_valid), "Called interior cycle a valid tree!"
+
+    print("All Passed!")
 
 if __name__ == "__main__":
     test_valid()
