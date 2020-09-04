@@ -29,7 +29,7 @@ Thoughts:
 #include<vector>
 #include<unordered_map>
 #include<utility>
-#include<priority_queue>
+#include<queue>
 
 using namespace std;
 
@@ -39,95 +39,59 @@ public:
     double maxProbability(int n, vector<vector<int>>& edges, vector<double>& succProb, int start, int end) {
 
         int from, to;
-        double startProb, edgeProb, newProb;
+        double edgeProb, newProb;
         double bestProb = 0;
         double endProb = 0;
         vector<pair<int, double>> *vertEdges;
         vector<bool> visited(n, false);
 
+        priority_queue<pair<double, int>> Q;
+        unordered_map<int, vector<pair<int, double>>> edgeMap;
+
 
         // Put all of the edges in a map that goes from: (to, prob)
-        unordered_map<int, vector<pair<int, double>>> edgeMap;
         for (int i=0; i < succProb.size(); i++) {
             from = edges[i][0];
             to = edges[i][1];
             edgeProb = succProb[i];
-            auto eIter = edgeMap.find(from);
 
-            if ( eIter == edgeMap.end() ) {
-                // Construct a new vector
-                edgeMap[from] = { pair<int, double>(to, edgeProb) };
-            } else {
-                // Append to existing vector
-                eIter->second.push_back(pair<int, double>(to, edgeProb));
-            }
-
-            eIter = edgeMap.find(to);
-
-            if ( eIter == edgeMap.end() ) {
-                // Construct a new vector
-                edgeMap[to] = { pair<int, double>(from, edgeProb) };
-            } else {
-                // Append to existing vector
-                eIter->second.push_back(pair<int, double>(from, edgeProb));
-            }
+            edgeMap[from].push_back(pair<int, double>(to, edgeProb));
+            edgeMap[to].push_back(pair<int, double>(from, edgeProb));
         }
 
         // Initialize sorted map of unvisited vertices based on their probability to reach
-        // (initialize on start vertex edges)
-        unordered_map<int, double> unvisitedProbs;
-        for (int i=0; i < n; i++) {
-            unvisitedProbs.insert(pair<int, double>(i, double(i == start)));
-        }
+        Q.push(pair<double, int>(1., start));
 
-        auto endIter = unvisitedProbs.end();
-
-
-        while ( !unvisitedProbs.empty() ) {
+        while ( !Q.empty() ) {
 
             // Get the highest probability element
-            bestProb = -1;
-            auto endIter = unvisitedProbs.begin();
-            for (auto it=endIter; it != unvisitedProbs.end(); ++it) {
-                if ( it->second > bestProb ) {
-                    from = it->first;
-                    bestProb = it->second;
-                }
-            }
+            auto p = Q.top();
+            bestProb = p.first;
+            from = p.second;
+            Q.pop();
 
-            if ( bestProb == 0  || bestProb < endProb || from == end) {
+            if ( visited[from] )
+                continue;
+
+            visited[from] = true;
+
+            if ( bestProb == 0 || bestProb < endProb || from == end)
                 break;
-            }
 
-            // cout << "Unvisited count: " << unvisitedProbs.size() << endl;
-            // cout << "Best Vertex: " << from << endl;
-            // cout << "Best Vertex Prob: " << endIter->second << endl;
-
-
-            // Use edge map to update sorted  probmap via remove and add.
+            // Use edge map to update queue
             vertEdges = &edgeMap[from];
             for (int j = 0; j < vertEdges->size(); j++) {
                 to = (*vertEdges)[j].first;
-                edgeProb = (*vertEdges)[j].second;
-
-                // cout << "Best V To: " << to << " prob: " << edgeProb << endl;
-
-                auto it = unvisitedProbs.find(to);
-
-                if ( it != unvisitedProbs.end() ) {
+                if ( !visited[to] ) {
+                    edgeProb = (*vertEdges)[j].second;
                     newProb = bestProb*edgeProb;
-                    if (it->second < newProb) {
-                        // Update that value via remove and replace
-                        unvisitedProbs[to] = newProb;
-                        // Update end prob if appropriate
-                        if (to == end) {
-                            endProb = newProb;
-                        }
-                    }
+
+                    Q.push(pair<double, int>(newProb, to));
+
+                    if ( to == end && newProb > endProb)
+                        endProb = newProb;
                 }
             }
-            // Pop highest from map
-            unvisitedProbs.erase(from);
         }
         return endProb;
     }
